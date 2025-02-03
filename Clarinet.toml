@@ -4,6 +4,10 @@ authors = []
 description = ""
 telemetry = false
 requirements = []
+[contracts.token-events]
+path = "contracts/token-events.clar"
+depends_on = []
+
 [contracts.token-sync]
 path = "contracts/token-sync.clar"
 depends_on = []
