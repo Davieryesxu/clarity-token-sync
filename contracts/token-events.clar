@@ -12,14 +12,15 @@
     old-state: uint,
     new-state: uint,
     triggered-by: principal,
-    timestamp: uint
+    timestamp: uint,
+    metadata: (optional (string-ascii 256))
   }
 )
 
 (define-data-var event-nonce uint u0)
 
 ;; Event logging
-(define-public (log-sync-event (token-id uint) (old-state uint) (new-state uint))
+(define-public (log-sync-event (token-id uint) (old-state uint) (new-state uint) (metadata (optional (string-ascii 256))))
   (let (
     (sender tx-sender)
     (event-id (var-get event-nonce))
@@ -32,7 +33,8 @@
         old-state: old-state, 
         new-state: new-state,
         triggered-by: sender,
-        timestamp: block-height
+        timestamp: block-height,
+        metadata: metadata
       }
     )
     (var-set event-nonce (+ event-id u1))
@@ -43,4 +45,8 @@
 ;; Read only functions  
 (define-read-only (get-event (event-id uint))
   (map-get? sync-events event-id)
+)
+
+(define-read-only (get-latest-event)
+  (get-event (- (var-get event-nonce) u1))
 )
