@@ -24,15 +24,27 @@ Clarinet.test({
 });
 
 Clarinet.test({
-  name: "Ensure contract pause prevents operations",
+  name: "Ensure validator management works correctly",
   async fn(chain: Chain, accounts: Map<string, Account>) {
     const deployer = accounts.get("deployer")!;
+    const validator = accounts.get("wallet_1")!;
     
     let block = chain.mineBlock([
-      Tx.contractCall("token-sync", "set-contract-pause", [types.bool(true)], deployer.address),
-      Tx.contractCall("token-sync", "register-token", [types.uint(1), types.none()], deployer.address)
+      Tx.contractCall("token-sync", "register-token", 
+        [types.uint(1), types.none()], 
+        deployer.address
+      ),
+      Tx.contractCall("token-sync", "add-validator",
+        [types.uint(1), types.principal(validator.address), types.uint(1)],
+        deployer.address
+      ),
+      Tx.contractCall("token-sync", "remove-validator",
+        [types.uint(1), types.principal(validator.address)],
+        deployer.address
+      )
     ]);
     
-    block.receipts[1].result.expectErr(104); // contract-paused
+    assertEquals(block.receipts[1].result.expectOk(), true);
+    assertEquals(block.receipts[2].result.expectOk(), true);
   },
 });
